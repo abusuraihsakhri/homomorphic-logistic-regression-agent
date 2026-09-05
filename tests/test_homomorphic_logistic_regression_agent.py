@@ -3,6 +3,7 @@ Automated Pytest Test Suite for Homomorphic Logistic Regression Agent.
 Domain: Post-Quantum Cryptography & Hardware Security
 Standard: NIST FIPS 203/204/205 / ISO/IEC 17825 Standards
 """
+import math
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -21,6 +22,12 @@ def test_phi_guard_enforcement():
 
     # Clean text passes
     PHIGuard.assert_no_phi("Analytical assay specimen KEY-001 optimal")
+
+
+def test_phi_guard_redaction():
+    redacted = PHIGuard.redact_phi("Contact patient at 555-123-4567 for results")
+    assert "555-123-4567" not in redacted
+    assert "[REDACTED_IDENTIFIER]" in redacted
 
 
 def test_specialized_workers():
@@ -63,3 +70,53 @@ def test_supervisor_consensus_and_audit():
     assert main(["audit", "--task-id", "CLI-TEST-01"]) == 0
     assert main(["chat", "Explain", "specifications"]) == 0
     assert main(["verify-audit"]) == 0
+
+
+def test_input_validation_rejects_nan():
+    """NaN metric values should be rejected."""
+    with pytest.raises(ValueError, match="primary_metric must be a finite number"):
+        SystemTaskPayload(task_id="T1", target_identifier="KEY-01", primary_metric=float("nan"))
+
+
+def test_input_validation_rejects_infinity():
+    """Infinity metric values should be rejected."""
+    with pytest.raises(ValueError, match="primary_metric must be a finite number"):
+        SystemTaskPayload(task_id="T1", target_identifier="KEY-01", primary_metric=float("inf"))
+
+
+def test_input_validation_rejects_negative_infinity():
+    """Negative infinity metric values should be rejected."""
+    with pytest.raises(ValueError, match="secondary_metric must be a finite number"):
+        SystemTaskPayload(task_id="T1", target_identifier="KEY-01", primary_metric=10.0, secondary_metric=float("-inf"))
+
+
+def test_input_validation_rejects_empty_strings():
+    """Empty string identifiers should be rejected."""
+    with pytest.raises(ValueError, match="task_id must be a non-empty string"):
+        SystemTaskPayload(task_id="", target_identifier="KEY-01", primary_metric=10.0)
+
+    with pytest.raises(ValueError, match="target_identifier must be a non-empty string"):
+        SystemTaskPayload(task_id="T1", target_identifier="   ", primary_metric=10.0)
+
+
+def test_batch_cli_handles_missing_file():
+    """CLI batch command should handle missing input file gracefully."""
+    exit_code = main(["batch", "-i", "nonexistent_file.csv", "-o", "out.csv"])
+    assert exit_code == 1
+
+
+def test_batch_cli_processes_valid_csv():
+    """CLI batch command should process valid CSV and produce output."""
+    import tempfile
+    import os
+    csv_content = "task_id,target_identifier,primary_metric,secondary_metric,is_critical_flag,status_descriptor\nTASK-B1,TARGET-B1,28.4,14.2,True,DISCORDANT\nTASK-B2,TARGET-B2,12.0,4.1,False,NOMINAL\n"
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False, newline='') as f:
+        f.write(csv_content)
+        tmp_path = f.name
+    try:
+        exit_code = main(["batch", "-i", tmp_path, "-o", "test_output.csv"])
+        assert exit_code == 0
+        assert os.path.exists("test_output.csv")
+        os.remove("test_output.csv")
+    finally:
+        os.unlink(tmp_path)

@@ -1,3 +1,4 @@
+import math
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -42,3 +43,30 @@ def test_coordinator():
 def test_cli():
     assert main(["audit", "--task-id", "CLI-01"]) == 0
     assert main(["chat", "What", "is", "the", "system", "status?"]) == 0
+
+
+def test_frontier_payload_rejects_nan():
+    """NaN metric values should be rejected."""
+    with pytest.raises(ValueError, match="primary_metric must be a finite number"):
+        FrontierPayload("T1", "KEY-01", primary_metric=float("nan"), secondary_metric=4.0, status_descriptor="NOMINAL")
+
+
+def test_frontier_payload_rejects_infinity():
+    """Infinity metric values should be rejected."""
+    with pytest.raises(ValueError, match="secondary_metric must be a finite number"):
+        FrontierPayload("T1", "KEY-01", primary_metric=10.0, secondary_metric=float("inf"), status_descriptor="NOMINAL")
+
+
+def test_frontier_payload_rejects_empty_strings():
+    """Empty string identifiers should be rejected."""
+    with pytest.raises(ValueError, match="task_id must be a non-empty string"):
+        FrontierPayload("", "KEY-01", primary_metric=10.0, secondary_metric=4.0, status_descriptor="NOMINAL")
+
+    with pytest.raises(ValueError, match="target_identifier must be a non-empty string"):
+        FrontierPayload("T1", "", primary_metric=10.0, secondary_metric=4.0, status_descriptor="NOMINAL")
+
+
+def test_frontier_payload_rejects_empty_status():
+    """Empty status descriptor should be rejected."""
+    with pytest.raises(ValueError, match="status_descriptor must be a non-empty string"):
+        FrontierPayload("T1", "KEY-01", primary_metric=10.0, secondary_metric=4.0, status_descriptor="   ")
