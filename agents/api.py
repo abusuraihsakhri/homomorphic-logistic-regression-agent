@@ -1,10 +1,12 @@
 """
 FastAPI REST API Server for Homomorphic Logistic Regression Agent.
 """
-from typing import Dict, Any, List
-from fastapi import FastAPI, HTTPException
+import hmac
+import os
+from typing import Dict, Any, List, Optional
+from fastapi import FastAPI, HTTPException, Header
 from pydantic import BaseModel
-from .base import AuditLogger, PHIGuard
+from .base import AuditLogger, PHIGuard, SecurityException
 from .models import SystemTaskPayload, ConsensusDossier
 from .supervisor import SystemSupervisor
 
@@ -37,7 +39,10 @@ def metrics():
 
 @app.post("/api/audit")
 def api_audit(payload: SystemTaskPayload):
-    dossier = supervisor.process_task(payload)
+    try:
+        dossier = supervisor.process_task(payload)
+    except SecurityException:
+        raise HTTPException(status_code=400, detail="Sensitive identifiers are not accepted") from None
     return dossier.to_dict()
 
 
@@ -46,10 +51,16 @@ def api_chat(req: ChatRequest):
     try:
         ans = supervisor.query_supervisory_chat(req.query)
         return {"response": ans}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    except SecurityException:
+        raise HTTPException(status_code=400, detail="Sensitive identifiers are not accepted") from None
 
 
 @app.get("/api/audit/logs")
-def api_audit_logs():
+def api_audit_logs(x_audit_token: Optional[str] = Header(default=None)):
+    """Audit metadata requires an explicitly configured operator token."""
+    token = os.getenv("AUDIT_LOG_READ_TOKEN")
+    if not token:
+        raise HTTPException(status_code=503, detail="Audit log access is disabled")
+    if not x_audit_token or not hmac.compare_digest(x_audit_token, token):
+        raise HTTPException(status_code=403, detail="Invalid audit log token")
     return {"audit_trail": AuditLogger.get_trail(), "verified": AuditLogger.verify_integrity()}

@@ -24,11 +24,19 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install fastapi uvicorn pydantic pytest
+        python -m pip install -e ".[dev]"
+        python -m pip check
+
+    - name: Compile Python modules
+      run: python -m compileall -q agents he_logistic_reg cli.py enrichment.py simulator.py
 
     - name: Run Pytest Suite
+      run: python -m pytest -v
+
+    - name: Validate browser JavaScript
       run: |
-        pytest -v
+        node --check web/app.js
+        node --test web/tests/*.test.cjs
 
     - name: Security SAST & Zero-PHI Audit
       run: |
