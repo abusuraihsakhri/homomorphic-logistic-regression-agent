@@ -93,7 +93,7 @@ class HELogisticRegCoordinator:
             "critical_count": crit_count,
             "warning_count": warn_count,
             "alerts": [a.to_dict() for a in all_alerts],
-            "standard_specification": "Homomorphic Machine Learning Standards",
+            "standard_specification": "Illustrative threshold rules (not homomorphic computation)",
             "consensus_summary": f"Consensus evaluation completed across 3 sub-agents with status [{status.value}].",
         }
 
@@ -105,6 +105,6 @@ class HELogisticRegCoordinator:
         if "status" in q or "ledger" in q:
             return f"HE-LogisticReg: Encrypted Gradient Descent & Clinical Risk Scorer Agent currently managing {len(self.execution_ledger)} execution tasks in air-gapped memory."
         elif "standard" in q or "spec" in q:
-            return "Active runtime operating strictly according to Homomorphic Machine Learning Standards specifications."
+            return "Active runtime operating strictly according to Illustrative threshold rules (not homomorphic computation) specifications."
         else:
             return f"HE-LogisticReg: Encrypted Gradient Descent & Clinical Risk Scorer Agent executive coordinator online. Zero-telemetry on-premises surveillance active."

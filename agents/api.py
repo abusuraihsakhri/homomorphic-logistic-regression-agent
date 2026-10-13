@@ -14,7 +14,7 @@ supervisor = SystemSupervisor(model_provider="mock")
 
 app = FastAPI(
     title="Homomorphic Logistic Regression Agent API",
-    description="Enterprise Distributed Component Platform (Post-Quantum Cryptography & Hardware Security)",
+    description="Illustrative deterministic rule evaluation API",
     version="3.0.0-ENTERPRISE",
 )
 
@@ -25,7 +25,7 @@ class ChatRequest(BaseModel):
 
 @app.get("/health")
 def health():
-    return {"status": "HEALTHY", "service": "homomorphic-logistic-regression-agent", "domain": "Post-Quantum Cryptography & Hardware Security", "standard": "NIST FIPS 203/204/205 / ISO/IEC 17825 Standards", "version": "3.0.0-ENTERPRISE"}
+    return {"status": "HEALTHY", "service": "homomorphic-logistic-regression-agent", "domain": "Deterministic Rules Auditing", "standard": "Illustrative repository rules (no standards certification)", "version": "3.0.0-ENTERPRISE"}
 
 
 @app.get("/metrics")

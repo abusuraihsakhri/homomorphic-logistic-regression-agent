@@ -52,7 +52,7 @@ def main(argv=None):
         dossier = coordinator.process(payload)
         print("=" * 80)
         print(f"  HE-LOGISTICREG: ENCRYPTED GRADIENT DESCENT & CLINICAL RISK SCORER AGENT")
-        print(f"  Domain: Privacy-Preserving Federated Healthcare & FHE | Standard: Homomorphic Machine Learning Standards")
+        print(f"  Domain: Privacy-Preserving Federated Healthcare & FHE | Standard: Illustrative threshold rules (not homomorphic computation)")
         print(f"  Task: {dossier['task_id']} | Status: [{dossier['overall_status']}] | Total Alerts: {dossier['total_alerts']}")
         print("=" * 80)
         for a in dossier["alerts"]:

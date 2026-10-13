@@ -1,7 +1,7 @@
 """
 Data Models & Telemetry Definitions for HE-LogisticReg: Encrypted Gradient Descent & Clinical Risk Scorer Agent.
 Domain: Privacy-Preserving Federated Healthcare & FHE
-Standard: Homomorphic Machine Learning Standards
+Standard: Illustrative threshold rules (not homomorphic computation)
 """
 import datetime
 import math
@@ -57,7 +57,7 @@ class AgentTelemetryAlert:
     summary: str
     technical_details: str
     actionable_remediation: str
-    standard_reference: str = "Homomorphic Machine Learning Standards"
+    standard_reference: str = "Illustrative threshold rules (not homomorphic computation)"
     timestamp: str = field(default_factory=lambda: datetime.datetime.now(datetime.timezone.utc).isoformat())
 
     def to_dict(self) -> Dict[str, Any]:
