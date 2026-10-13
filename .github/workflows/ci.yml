@@ -1,5 +1,9 @@
 name: Homomorphic Logistic Regression Engine CI/CD & Security Verification
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: [ master, main ]
