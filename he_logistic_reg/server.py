@@ -15,7 +15,7 @@ def create_app():
 
         app = FastAPI(
             title="HE-LogisticReg: Encrypted Gradient Descent & Clinical Risk Scorer Agent",
-            description="Executes iterative encrypted gradient descent for cardiovascular risk prediction using Taylor series approximations of sigmoid functions.",
+            description="Executes illustrative threshold and descriptor checks; no encrypted gradient descent or predictive model is implemented.",
             version="2.0.0-FRONTIER",
         )
 

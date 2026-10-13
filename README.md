@@ -1,193 +1,73 @@
 # Homomorphic Logistic Regression Agent
 
-> **Domain:** Post-Quantum Cryptography & Zero-Knowledge Architecture
-> **Reference Guidelines & Standards:** `NIST FIPS 203/204/205, NIST SP 800-90B & ISO/IEC Standards`
+**Current implementation:** a deterministic three-worker threshold/anomaly audit demonstration, not homomorphic encryption or logistic regression.
 
-<div align="center">
+The CLI and FastAPI service evaluate two numeric metrics, a status descriptor, and an optional critical flag, then return structured alerts. A standalone browser demonstration can evaluate the same primary rules locally or connect to the API.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-3776AB.svg?logo=python&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688.svg?logo=fastapi&logoColor=white)
-![Audit Trail](https://img.shields.io/badge/Audit-HMAC--SHA256_Tamper--Evident-brightgreen.svg)
-![Zero-PHI Guard](https://img.shields.io/badge/Guard-Zero--PHI_Outbound-blue.svg)
-![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)
+**Scientific and clinical limitations:** The main rules use primary > 25 and secondary > 12, which are arbitrary example thresholds, not validated clinical cutoffs. The repository has no logistic-regression training, CKKS/BFV implementation, encrypted gradient descent, formal validation, or NIST/CAP/CLSI certification. Do not use it for clinical decisions or enter patient-identifying information.
 
-</div>
+## Interfaces
 
----
+- **Browser:** open web/index.html, or host the web/ directory statically. Local mode makes no network requests and exports JSON. API mode sends POST /api/audit to a Python backend on the same origin, and shows a real error when unavailable.
+- **Main CLI:** single task audit, mock chat, CSV batch processing, and in-process audit verification.
+- **FastAPI:** GET /health, GET /metrics, POST /api/audit, POST /api/chat, and protected GET /api/audit/logs.
+- **Legacy he_logistic_reg package:** a separate set of illustrative checks. It uses secondary > 10, compared with the main API's > 12. Neither interface performs homomorphic encryption.
 
-## 📖 What It Does
+## Local installation
 
-**Homomorphic Logistic Regression Agent** is an advanced analytical and computational platform implementing Encrypted gradient descent using Taylor series sigmoid approximations for clinical risk. It provides a multi-worker evaluation system that processes task payloads through specialized workers to produce consensus dossiers with cryptographic audit trails.
+Python 3.10 or later:
 
----
-
-## ⚙️ Key Capabilities & Algorithmic Modules
-
-- **Deterministic Calculation Engine**: Strict compliance with standard reference formulations and thresholds.
-- **Risk & Urgency Classification**: Multi-tier categorization with automated clinical/operational action recommendations.
-- **Validation & Guardrails**: Rigorous input bounds checking and anomaly detection.
-- **Multi-Worker Evaluation**: Three specialized workers (InvariantQC, SafetyEscalation, ProtocolConformance) analyze each task.
-- **Enrichment Suite**: Eight feature engines for comprehensive domain analysis.
-
----
-
-## 💻 Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/abusuraihsakhri/homomorphic-logistic-regression-agent.git
-cd homomorphic-logistic-regression-agent
-
-# Install dependencies
-pip install fastapi uvicorn pydantic pytest
-
-# Optional: Set audit secret key for persistent audit trails
-export AUDIT_SECRET_KEY="your-secure-key-here"
-```
-
----
-
-## 💻 CLI Quickstart & Usage
-
-### 1. Single Task Evaluation
-```bash
-python cli.py audit --task-id TASK-001 --target TARGET-01 --primary 28.5 --secondary 14.2 --critical --status DISCORDANT
-```
-
-### 2. Interactive Chat
-```bash
-python cli.py chat "What is the system status?"
-```
-
-### 3. Batch Processing
-```bash
+~~~bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -e ".[dev]"
+python cli.py audit --task-id DEMO-1 --target EXAMPLE-1 --primary 28.5 --secondary 14.2 --critical --status DISCORDANT
 python cli.py batch -i sample.csv -o results.csv
-```
-
-### 4. Verify Audit Trail Integrity
-```bash
 python cli.py verify-audit
-```
-
-### 5. Launch REST API Server
-```bash
 python cli.py serve --host 127.0.0.1 --port 8000
-```
+~~~
 
-### Parameter Reference
-- `--task-id`: Unique task/case identifier (required, non-empty)
-- `--target`: Target entity identifier (required, non-empty)
-- `--primary`: Primary metric value (required, finite number)
-- `--secondary`: Secondary metric value (default: 0.0, finite number)
-- `--critical`: Flag for critical/emergency escalation
-- `--status`: Status descriptor (default: NOMINAL)
+The installed homomorphic-logistic-regression-engine entry point invokes the **legacy** he_logistic_reg CLI, whereas python cli.py invokes the main API's rule set.
 
-### Input Data Schema
+~~~bash
+curl -sS http://127.0.0.1:8000/api/audit -H 'Content-Type: application/json' \
+  -d '{"task_id":"DEMO-1","target_identifier":"EXAMPLE-1","primary_metric":28.5,"secondary_metric":14.2,"status_descriptor":"DISCORDANT","is_critical_flag":true}'
+~~~
 
-| Field | Description | Requirement |
-|:------|:------------|:------------|
-| `task_id` | Parameter / observation metric | Required, non-empty |
-| `target_identifier` | Parameter / observation metric | Required, non-empty |
-| `primary_metric` | Primary measurement value | Required, finite number |
-| `secondary_metric` | Secondary measurement value | Optional, finite number |
-| `is_critical_flag` | Emergency escalation flag | Optional, boolean |
-| `status_descriptor` | Status code descriptor | Optional, non-empty |
+**Access control:** POST /api/audit is unauthenticated; use the backend only on a trusted local interface, not as a public clinical service. GET /api/audit/logs returns HTTP 503 unless AUDIT_LOG_READ_TOKEN is configured. Then supply the value via the X-Audit-Token request header.
 
----
+## Audit and privacy limitations
 
-## 🔒 REST API Endpoints
+The main Python API maintains **in-memory** HMAC-SHA256-chained metadata. Set AUDIT_SECRET_KEY to a strong random secret for controlled deployments; otherwise an ephemeral key is generated at startup. Verification recomputes each MAC and checks links. Records are **not persisted** across restarts; chain verification cannot detect deletion of the entire log, and this is not an externally anchored audit mechanism.
 
-| Method | Endpoint | Description |
-|:-------|:---------|:------------|
-| GET | `/health` | Health check and system metadata |
-| GET | `/metrics` | Operational metrics |
-| POST | `/api/audit` | Submit task for evaluation |
-| POST | `/api/chat` | Query supervisory chat |
-| GET | `/api/audit/logs` | Retrieve HMAC-verified audit trail |
+The identifier guard uses limited regex patterns: this **does not guarantee PHI removal, de-identification, or HIPAA Safe Harbor compliance**. The chat adapter is a mock; provider aliases are not real Ollama, Anthropic, or OpenAI integrations. Browser local mode keeps inputs in memory only, uses no browser storage, analytics, or network requests, and produces **unsigned and unencrypted** JSON. API mode submits input to the running backend.
 
----
+## Docker
 
-## 🛡️ Security & Enterprise Architecture
+Generate a fresh secret and export it before running:
 
-* **Zero-PHI Outbound Interceptor:** Active regex inspection blocking SSNs, MRNs, phone numbers, and patient identifiers.
-* **Tamper-Evident HMAC-SHA256 Audit Trail:** Chained, cryptographically signed logs for every evaluation and state transition.
-* **Input Validation:** All metric values validated as finite numbers; string identifiers checked for non-empty values.
-* **Batch Error Handling:** Invalid rows are skipped and reported without halting processing.
-* **Air-Gapped LLM Reasoning Adapter:** Agnostic integration for local Ollama instances (`llama3`, `mistral`), Claude 3.5 Sonnet, GPT-4o, and deterministic test mocks.
+~~~bash
+python -c "import secrets; print(secrets.token_hex(32))"
+export AUDIT_SECRET_KEY='replace-with-the-generated-secret'
+docker compose up --build
+~~~
 
----
+Compose binds the service to 127.0.0.1:8000 on the host. **Rotate the former committed signing key** if it was used outside a demo; removing it from the current tree does not remove its historical exposure.
 
-## 🧪 Testing & Verification
+## Tests
 
-Run the automated test suite:
+~~~bash
+python -m pytest -v
+node --check web/app.js
+node --test web/tests/*.test.cjs
+~~~
 
-```bash
-pytest -v
-```
+CI tests Python 3.10, 3.11 and 3.12, package installation and dependency checks, and browser JavaScript tests. The static web/ folder can be deployed via GitHub Pages, but GitHub Pages cannot run the FastAPI backend or execute homomorphic computation.
 
-Execute high-throughput batch simulation benchmarks:
+## Repository structure
 
-```bash
-python simulator.py 1000
-```
+agents/ contains the primary rules, supervisor, mock chat, audit and API; he_logistic_reg/ is the alternate interface; enrichment.py holds further generic threshold evaluators; web/ is the static browser demo; tests/ and web/tests/ are regression tests.
 
----
+## License
 
-## 🐳 Container Deployment
-
-```bash
-docker build -t homomorphic-logistic-regression-agent .
-docker run -p 8000:8000 -e AUDIT_SECRET_KEY=your-secure-key homomorphic-logistic-regression-agent
-```
-
-Or using Docker Compose:
-
-```bash
-docker-compose up -d
-```
-
----
-
-## 📁 Project Structure
-
-```
-homomorphic-logistic-regression-agent/
-├── agents/                  # Core agent modules (models, workers, supervisor, API)
-│   ├── api.py              # FastAPI REST endpoints
-│   ├── base.py             # Security, PHI guard, HMAC audit
-│   ├── learning.py         # Active learning calibration engine
-│   ├── llm_factory.py      # LLM provider factory
-│   ├── metrics.py          # Prometheus metrics collector
-│   ├── models.py           # Pydantic data models with validation
-│   ├── streamer.py         # WebSocket telemetry broadcaster
-│   ├── supervisor.py       # Master supervisor orchestrator
-│   └── workers.py          # Specialized evaluation workers
-├── he_logistic_reg/        # HE-LogisticReg engine module
-│   ├── agents.py           # Domain agent implementations
-│   ├── cli.py              # HE-LogisticReg CLI
-│   ├── engine.py           # Core algorithmic engine
-│   ├── models.py           # Data models with validation
-│   └── server.py           # FastAPI server factory
-├── tests/                  # Pytest test suite
-│   ├── test_enrichment.py
-│   ├── test_he_logistic_reg.py
-│   └── test_homomorphic_logistic_regression_agent.py
-├── web/index.html          # Operations console UI
-├── enrichment.py           # Feature enrichment engines
-├── simulator.py            # High-throughput simulation
-├── cli.py                  # Main CLI entry point
-├── he_logistic_reg_app.py  # HE-LogisticReg app entry
-├── sample.csv              # Sample batch input
-├── sample_payload.json     # Sample API payload
-├── benchmark_dataset.json  # Benchmark test cases
-├── Dockerfile              # Container build config
-├── docker-compose.yml      # Container orchestration
-└── pyproject.toml          # Project metadata and dependencies
-```
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License - see [LICENSE](LICENSE) for details.
+MIT; see [LICENSE](LICENSE).

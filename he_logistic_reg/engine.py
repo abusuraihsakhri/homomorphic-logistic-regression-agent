@@ -1,7 +1,7 @@
 """
 Core Algorithmic Engine & Cryptographic / Biological Logic for HE-LogisticReg: Encrypted Gradient Descent & Clinical Risk Scorer Agent.
 Domain: Privacy-Preserving Federated Healthcare & FHE
-Standard: Homomorphic Machine Learning Standards
+Standard: Illustrative threshold rules (not homomorphic computation)
 """
 import math
 from typing import Dict, Any, List, Optional
@@ -9,7 +9,7 @@ from .models import FrontierPayload, AgentTelemetryAlert, ExecutionStatus
 
 
 class FrontierDomainEngine:
-    STANDARD = "Homomorphic Machine Learning Standards"
+    STANDARD = "Illustrative threshold rules (not homomorphic computation)"
     PRIMARY_BOUND = 25.0
     SECONDARY_BOUND = 10.0
 
@@ -18,7 +18,7 @@ class FrontierDomainEngine:
         if value > cls.PRIMARY_BOUND:
             return {
                 "summary": "Primary Domain Boundary Deviation",
-                "details": f"Parameter value ({value:.3f}) exceeds operational threshold ({cls.PRIMARY_BOUND:.1f}) under Homomorphic Machine Learning Standards.",
+                "details": f"Parameter value ({value:.3f}) exceeds operational threshold ({cls.PRIMARY_BOUND:.1f}) under Illustrative threshold rules (not homomorphic computation).",
                 "remediation": "Engage parameter recalibration and algorithmic verification routine.",
             }
         return None
@@ -39,7 +39,7 @@ class FrontierDomainEngine:
         if any(flag in desc_upper for flag in ["VIOLATION", "DISCORDANT", "ANOMALY", "MUTANT", "LEAK"]):
             return {
                 "summary": "Specification / Protocol Anomaly Identified",
-                "details": f"Telemetry status flag '{descriptor}' violates Homomorphic Machine Learning Standards conformance matrix.",
+                "details": f"Telemetry status flag '{descriptor}' violates Illustrative threshold rules (not homomorphic computation) conformance matrix.",
                 "remediation": "Execute automated rollback or secondary consensus verification.",
             }
         return None
