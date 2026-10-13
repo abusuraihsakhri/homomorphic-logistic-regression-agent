@@ -1,8 +1,8 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Homomorphic Logistic Regression Engine API",
-    "description": "Enterprise Distributed Component Platform (Clinical & Cryptographic AI) adhering to CAP / CLSI / NIST Standards.",
+    "title": "Homomorphic Logistic Regression Agent — Example Rules API",
+    "description": "Deterministic, illustrative threshold checks; no encrypted computation, model training, or validated clinical risk prediction.",
     "version": "3.0.0-ENTERPRISE",
     "contact": {
       "name": "Dr. Abu Suraih Sakhri",
@@ -15,17 +15,17 @@
         "summary": "Health and metadata check",
         "responses": {
           "200": {
-            "description": "System optimal"
+            "description": "Service process available; not a clinical validation statement"
           }
         }
       }
     },
     "/metrics": {
       "get": {
-        "summary": "Prometheus operational metrics",
+        "summary": "In-memory application counters",
         "responses": {
           "200": {
-            "description": "Prometheus text metrics"
+            "description": "JSON operational counts"
           }
         }
       }
@@ -69,14 +69,14 @@
         },
         "responses": {
           "200": {
-            "description": "Consensus dossier with HMAC signature"
+            "description": "Structured rules dossier with an HMAC audit reference; dossier itself is not cryptographically signed"
           }
         }
       }
     },
     "/api/chat": {
       "post": {
-        "summary": "Air-gapped supervisory conversational assistant",
+        "summary": "Deterministic mock chat adapter (no model inference)",
         "requestBody": {
           "content": {
             "application/json": {
@@ -96,19 +96,36 @@
         },
         "responses": {
           "200": {
-            "description": "Supervisory response"
+            "description": "Mock response"
           }
         }
       }
     },
     "/api/audit/logs": {
       "get": {
-        "summary": "Retrieve and cryptographically verify HMAC audit trail",
+        "summary": "Access in-memory audit ledger and verify stored MAC signatures (operator token required)",
         "responses": {
           "200": {
             "description": "Cryptographic audit trail"
+          },
+          "403": {
+            "description": "Missing or invalid audit log token"
+          },
+          "503": {
+            "description": "Audit log endpoint disabled (token not configured)"
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "X-Audit-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Operator token configured via AUDIT_LOG_READ_TOKEN"
+          }
+        ]
       }
     }
   }
